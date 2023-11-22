@@ -1,6 +1,5 @@
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import './App.css';
-import * as tf from '@tensorflow/tfjs';
 import * as facemesh from '@tensorflow-models/facemesh';
 import Webcam from 'react-webcam';
 import { drawMesh, calculateDistance } from './drawing_utilities';
@@ -8,6 +7,7 @@ import { drawMesh, calculateDistance } from './drawing_utilities';
 function App() {
   const cameraRef = useRef(null);
   const canvasRef = useRef(null);
+  const [distanceBetweenEyes, setDistanceBetweenEyes] = useState(null);
 
   const runFacemesh = async () => {
     const net = await facemesh.load({
@@ -48,10 +48,13 @@ function App() {
         const rightEye = face[0].scaledMesh[386];
 
         // Calcule a distância entre os olhos
-        const distanceBetweenEyes = calculateDistance(leftEye, rightEye);
+        const distance = calculateDistance(leftEye, rightEye);
+
+        // Atualize o estado com a distância
+        setDistanceBetweenEyes(distance);
 
         // Imprima a distância no console
-        console.log('Distância entre os olhos:', distanceBetweenEyes);
+        console.log('Distância entre os olhos:', distance);
       }
     }
   };
@@ -91,7 +94,12 @@ function App() {
             zIndex: 9,
           }}
         />
-        <h3 className="text">Face Mesh App</h3>
+        <h3 className="text">FaceSense</h3>
+
+        {/* Renderize a distância na aplicação */}
+        {distanceBetweenEyes !== null && (
+          <div className="distance-text">Distância dos olhos: {distanceBetweenEyes}</div>
+        )}
       </header>
     </div>
   );
